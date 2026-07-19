@@ -1,4 +1,4 @@
-# LushwaterLFG v1.0
+# LushwaterLFG
 
 Random Dungeon Finder + LFG addon for **World of Warcraft 1.12.1** (vanilla),
 built for the Lushwater server. Uses only the stock 1.12 Lua/UI API — no client
@@ -98,20 +98,6 @@ Replies: `SUMMON_OK`, `SUMMON_FAIL:<reason>`, `PORT_OUT_OK`, `PORT_IN_OK`,
 
 See `docs/lushwater/PartII_RdfTeleports.md` and `Rdf_Security_Audit.md` for the
 server side and security posture.
-
-## Testing checklist
-
-1. Two opposite-faction clients queued → never matched.
-2. Five same-faction clients (1 tank, 1 heal, 3 dps, overlapping levels) →
-   proposal arrives, ready popup shows the right dungeon and roles.
-3. One declines → decliner gets a 5-minute deserter; the other four stay queued.
-4. All accept → tank invites, others auto-accept, party is teleported in.
-5. Kill the final boss → every member gets a completion reward once per run.
-6. Teleport out → back to pre-summon spot; Teleport in → re-enters.
-7. Matcher leaves mid-queue → matching resumes under the next matcher.
-8. Ready-check timeout → counts as decline + deserter.
-9. Druid queued as Tank+Heal+DPS gets assigned exactly one role.
-10. Member leaves mid-run → replacement is found, invited, and teleported in.
 
 ## Known limitations
 
