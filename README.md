@@ -53,6 +53,16 @@ missing. The `images/` folder is included in this repository.
 - **Specific tab** — choose your role and the dungeons you want, click **Queue**.
 - Click the minimap eye button to open the window; drag it to move.
 
+## Screenshots
+
+### Random Dungeon tab
+
+![Random Dungeon tab](screenshots/random.png)
+
+### Specific Dungeon tab
+
+![Specific Dungeon tab](screenshots/specific.png)
+
 ## Protocol
 
 All peer-to-peer traffic runs on the hidden channel `LushLFG`:
