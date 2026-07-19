@@ -1,0 +1,8 @@
+## Interface: 11200
+## Title: Lushwater LFG
+## Author: Lushwater Project
+## Version: 1.0
+## Notes: Random Dungeon Finder + LFG tool for the Lushwater 1.12.1 server. Same-faction only. Design reference: LFT (Turtle WoW).
+## SavedVariables: LWLFG_Settings
+
+LushwaterLFG.xml
