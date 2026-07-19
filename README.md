@@ -43,8 +43,8 @@ Copy the `LushwaterLFG/` folder into `Interface/AddOns/` of a 1.12.1 client and
 enable it on the character-select addon screen. Folder name must be exactly
 `LushwaterLFG`.
 
-Optional: run `./fetch-lft-art.sh` to download LFT textures into `images/` for
-the full LFT visual skin. The art is not committed to this repository.
+Optional: run `./fetch-lft-art.sh` to download LFT textures into `images/` if they are
+missing. The `images/` folder is included in this repository.
 
 ## Usage
 
