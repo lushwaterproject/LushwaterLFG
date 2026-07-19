@@ -18,20 +18,17 @@ channel pattern.
 - **Random Dungeon Finder** — queue as Tank, Healer, and/or DPS; the matcher
   builds 1/1/3 parties for a random dungeon appropriate to your level and the
   server's current phase.
-- **Ready check** — WotLK-style popup with a live status strip showing each
+- **Ready check** — Popup with a live status strip showing each
   member's role and waiting/ready/declined state.
-- **Specific Dungeon LFG** — pick individual dungeons, broadcast to same-faction
-  players, whisper from the live list.
-- **Server teleport** — when a random group forms, the leader can teleport the
-  party into the dungeon; members can teleport out and back in while the group is
+- **Specific Dungeon LFG** — pick individual dungeons and broadcast to same-faction
+  players.
+- **Server teleport** — when a random group forms each party member is teleported into
+  the dungeon automatically; members can teleport out and back in while the group is
   active.
 - **Completion rewards** — bonus XP and money paid once per run when the final
-  boss dies (requires server feature enabled).
+  boss dies.
 - **Replacement queueing** — if a member leaves or is kicked mid-run, the leader
-  automatically re-queues for a replacement (retail-style).
-- **LFT skin** — if LFT art is present in `images/`, the addon renders LFT's full
-  chrome, dungeon backdrops, role icons, and animated minimap eye. Falls back to
-  stock 1.12 art otherwise.
+  automatically re-queues for a replacement.
 - **Minimap eye button** — opens the window, animates while queued, and can be
   dragged around the minimap edge (position saved).
 - **Same-faction only** — every protocol message carries the sender's faction
