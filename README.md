@@ -31,6 +31,11 @@ channel pattern.
   automatically re-queues for a replacement.
 - **Minimap eye button** — opens the window, animates while queued, and can be
   dragged around the minimap edge (position saved).
+- **World chat channel** — on login the addon joins the per-faction public
+  `World` channel (Alliance and Horde each get their own server-side instance).
+  Joined client-side because the stock 1.12.1 client never displays
+  server-forced custom-channel joins. Toggle with `/lwlfg world`
+  (persisted per account).
 - **Same-faction only** — every protocol message carries the sender's faction
   tag; the server also rejects cross-faction invites.
 
@@ -43,6 +48,8 @@ enable it on the character-select addon screen. Folder name must be exactly
 ## Usage
 
 - `/lwlfg` — toggle the Dungeon Finder window.
+- `/lwlfg world` — toggle the per-faction `World` chat channel on/off
+  (persisted; on by default).
 - **Random tab** — choose your role(s), click **Find Group**.
 - **Specific tab** — choose your role and the dungeons you want, click **Queue**.
 - Click the minimap eye button to open the window; drag it to move.

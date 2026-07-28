@@ -9,10 +9,14 @@
 
 LWLFG = LWLFG or {}   -- global namespace shared by all addon files
 
-LWLFG.ADDON_VERSION = "1.0"
+LWLFG.ADDON_VERSION = "1.1"
 LWLFG.CHANNEL_NAME  = "LushLFG"
 LWLFG.BOT_NAME      = "LushLFG"   -- server whisper/channel bot identity
 LWLFG.MSG_PREFIX    = "LW"          -- every protocol message starts with "LW:"
+-- Per-faction public World chat. Joined CLIENT-SIDE: the stock 1.12.1 client
+-- never displays server-forced custom-channel joins (verified on the live
+-- server), so the addon joins it like the protocol channel — but visibly.
+LWLFG.WORLD_CHANNEL_NAME = "World"
 local ENTRY_TTL     = 300           -- seconds before a stale specific-queue listing expires
 local SEND_SPACING  = 2.0           -- min seconds between outgoing channel messages (throttle)
 
@@ -375,6 +379,16 @@ local function ensureChannel()
     end
 end
 
+-- Visible per-faction World chat. Unlike the protocol channel we ATTACH it to
+-- the default chat frame (join notice + messages visible). Opt-out is kept in
+-- LWLFG_Settings.worldChannel and toggled with /lwlfg world.
+local function ensureWorldChannel()
+    if LWLFG_Settings and LWLFG_Settings.worldChannel == false then return end
+    if GetChannelName(LWLFG.WORLD_CHANNEL_NAME) == 0 then
+        JoinChannelByName(LWLFG.WORLD_CHANNEL_NAME, nil, DEFAULT_CHAT_FRAME:GetID())
+    end
+end
+
 -- ---------------------------------------------------------------------------
 -- Events
 -- ---------------------------------------------------------------------------
@@ -415,6 +429,19 @@ ev:SetScript("OnEvent", function()
 
         SLASH_LWLFG1 = "/lwlfg"
         SlashCmdList["LWLFG"] = function(msg)
+            if msg == "world" then
+                -- toggle the visible per-faction World channel (persisted)
+                if LWLFG_Settings.worldChannel == false then
+                    LWLFG_Settings.worldChannel = true
+                    ensureWorldChannel()
+                    LWLFG.print("World channel: ON (joined " .. LWLFG.WORLD_CHANNEL_NAME .. ")")
+                else
+                    LWLFG_Settings.worldChannel = false
+                    LeaveChannelByName(LWLFG.WORLD_CHANNEL_NAME)
+                    LWLFG.print("World channel: OFF (left " .. LWLFG.WORLD_CHANNEL_NAME .. ")")
+                end
+                return
+            end
             if msg == "debug" then
                 local B = LWLFG.Bot
                 local rw = B and B.reward
@@ -536,6 +563,7 @@ ev:SetScript("OnUpdate", function()
         if joinState.elapsed > 5 then       -- give the default channels time to settle
             joinState.pending = false
             ensureChannel()
+            ensureWorldChannel()
             if LWLFG.Bot then LWLFG.Bot.requestEligible() end
         end
     end
