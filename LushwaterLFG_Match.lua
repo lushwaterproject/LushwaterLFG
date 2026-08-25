@@ -65,13 +65,22 @@ local function intersectDungeons(setA, setB)
     return out
 end
 
+-- Server RANGES are authoritative for the level window once they arrive
+-- (audit L2): a candidate's reported level is only trusted when it fits at
+-- least one dungeon the server actually ranges — a level-lied entry drops out
+-- of matching instead of stalling the group until the summon bounces.
 local function eligibleSet(level)
     local s = {}
     for _, k in ipairs(LWLFG.eligibleDungeons(level)) do
         -- the elected matcher avoids phase-locked dungeons once the server
         -- bot has told us the global phase-open set
         if not LWLFG.Bot or not LWLFG.Bot.phaseOpen or LWLFG.Bot.phaseOpen[k] then
-            s[k] = true
+            if LWLFG.Bot and LWLFG.Bot.ranges and LWLFG.Bot.ranges[k] then
+                local r = LWLFG.Bot.ranges[k]
+                if level >= r.lo and level <= r.hi then s[k] = true end
+            else
+                s[k] = true
+            end
         end
     end
     return s
@@ -211,7 +220,12 @@ local function issueProposal()
 
     local dungeonList = {}
     for k, _ in pairs(common) do table.insert(dungeonList, k) end
-    local dungeon = dungeonList[math.random(table.getn(dungeonList))]
+    -- Deterministic minute-rotated pick (audit L3): a griefer matcher cannot
+    -- subvert a per-proposal `math.random` to always force the least-wanted
+    -- dungeon; the rotation is fixed per minute, and every member still
+    -- validates the chosen dungeon before accepting (see the PROP handler).
+    local pick = (math.floor(GetTime() / 60) % table.getn(dungeonList)) + 1
+    local dungeon = dungeonList[pick]
 
     local id = LWLFG.me .. "-" .. time()
     local memberStrs = {}
@@ -342,6 +356,16 @@ LWLFG.handlers["PROP"] = function(parts, sender)
         end
     end
     if not mine then return end                      -- proposal doesn't include us
+
+    -- Member-side dungeon guard (audit L3, defense in depth): with server
+    -- RANGES available, ignore any proposal whose chosen dungeon excludes my
+    -- REAL level — a malicious/forged matcher cannot force me into a run I
+    -- can't enter (and which would bounce at the server summon).
+    if LWLFG.Bot and LWLFG.Bot.ranges and LWLFG.Bot.ranges[dungeon] then
+        local r = LWLFG.Bot.ranges[dungeon]
+        local myLevel = UnitLevel("player")
+        if myLevel < r.lo or myLevel > r.hi then return end
+    end
 
     Q.propId = id
     Q.propRole = mine

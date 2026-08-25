@@ -59,7 +59,19 @@ local FAIL_TEXT = {
     teleport        = "Teleport failed.",
 }
 
-function B.failText(reason)
+function B.failText(reason, parts)
+    if parts then
+        local sub = parts[2]
+        if sub == "deserter" and parts[3] then
+            return "Deserter cooldown: wait " .. parts[3] .. "s before starting a new run."
+        end
+        if sub == "level" and parts[3] then
+            -- the server names the offending member (audit L2) so the leader
+            -- can kick them instead of guessing
+            return parts[3] .. " is outside the level range for that dungeon."
+        end
+        if sub then return B.failText(sub) end
+    end
     return FAIL_TEXT[reason] or ("Server error: " .. tostring(reason))
 end
 
@@ -112,7 +124,7 @@ function B.onMessage(msg, sender)
         if LWLFG.Queue.onSummoned then LWLFG.Queue.onSummoned(parts[2]) end
 
     elseif kind == "SUMMON_FAIL" then
-        LWLFG.print("Summon failed: " .. B.failText(parts[2]))
+        LWLFG.print("Summon failed: " .. B.failText(nil, parts))
         if LWLFG.Queue.onSummonFail then LWLFG.Queue.onSummonFail(parts[2]) end
 
     elseif kind == "PORT_OUT_OK" then
@@ -130,7 +142,7 @@ function B.onMessage(msg, sender)
         if LWLFG.Queue.onPortedIn then LWLFG.Queue.onPortedIn(parts[2]) end
 
     elseif kind == "PORT_FAIL" then
-        LWLFG.print("Teleport failed: " .. B.failText(parts[2]))
+        LWLFG.print("Teleport failed: " .. B.failText(nil, parts))
 
     elseif kind == "REWARD" then
         -- REWARD:<key>:<xp>:<copper> — completion bonus for killing the final boss
@@ -146,6 +158,20 @@ function B.onMessage(msg, sender)
         end
         if LWLFG.Queue.onReward then LWLFG.Queue.onReward() end
         if LWLFG.UI and LWLFG.UI.showComplete then LWLFG.UI.showComplete(parts[2]) end
+
+    elseif kind == "DESERTER" then
+        -- DESERTER:<remaining> — server-authoritative deserter cooldown.
+        -- The authorizing record lives on the server (L1); override the local
+        -- timer with the server's value so wiping SavedVariables doesn't clear
+        -- an active cooldown.
+        local remaining = tonumber(parts[2]) or 0
+        if LWLFG.settings then
+            if remaining > 0 then
+                LWLFG.settings.deserterUntil = time() + remaining
+            else
+                LWLFG.settings.deserterUntil = nil
+            end
+        end
 
     elseif kind == "UNAVAILABLE" then
         B.available = false

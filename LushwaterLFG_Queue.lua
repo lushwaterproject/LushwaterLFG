@@ -166,6 +166,9 @@ function Q.toggle()
         Q.leave(true)
         return
     end
+    -- Re-sync the server-authoritative deserter cooldown (audit L1) so a
+    -- SavedVariables wipe cannot clear it; the reply overrides deserterUntil.
+    if LWLFG.Bot then LWLFG.Bot.send("DESERTER") end
     if Q.deserterRemaining() > 0 then
         LWLFG.print("Deserter: you declined a ready check. Wait "
             .. math.ceil(Q.deserterRemaining()) .. "s.")
@@ -248,6 +251,10 @@ function Q.respondReady(accept)
             Q.rjoin = true
         else
             LWLFG.settings.deserterUntil = time() + DESERTER_SECONDS
+            -- report the decline to the server (audit L1): the authorizing
+            -- deserter record lives there, so a SavedVariables wipe cannot
+            -- clear it and the summon gate has something to enforce.
+            if LWLFG.Bot then LWLFG.Bot.send("DECLINE") end
             LWLFG.print("Declined — deserter for " .. DESERTER_SECONDS .. "s.")
             Q.leave(false)
         end
@@ -268,6 +275,9 @@ function Q.respondReady(accept)
         -- stay PROPOSED; Match forwards the FORM instruction
     else
         LWLFG.settings.deserterUntil = time() + DESERTER_SECONDS
+        -- report the decline to the server (audit L1) — see the replacement
+        -- branch above for why
+        if LWLFG.Bot then LWLFG.Bot.send("DECLINE") end
         LWLFG.print("Declined — deserter for " .. DESERTER_SECONDS .. "s.")
         Q.leave(false)
     end

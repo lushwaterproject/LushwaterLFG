@@ -9,7 +9,7 @@
 
 LWLFG = LWLFG or {}   -- global namespace shared by all addon files
 
-LWLFG.ADDON_VERSION = "1.1"
+LWLFG.ADDON_VERSION = "1.2"
 LWLFG.CHANNEL_NAME  = "LushLFG"
 LWLFG.BOT_NAME      = "LushLFG"   -- server whisper/channel bot identity
 LWLFG.MSG_PREFIX    = "LW"          -- every protocol message starts with "LW:"
