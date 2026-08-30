@@ -118,6 +118,14 @@ function B.onMessage(msg, sender)
         -- REWARDINFO:<xp>:<copper> — completion reward for my level/phase state
         B.reward = { xp = tonumber(parts[2]) or 0, copper = tonumber(parts[3]) or 0 }
 
+    elseif kind == "VER" then
+        -- VER:<latest>:<min> — server-known addon versions. The addon compares
+        -- these against its own ADDON_VERSION and, if below the minimum, covers
+        -- its window with an update notice on next open.
+        B.latest = parts[2]
+        B.min = parts[3]
+        if LWLFG.onVersion then LWLFG.onVersion(B.latest, B.min) end
+
     elseif kind == "SUMMON_OK" then
         LWLFG.print("|cffffd100Teleported to " .. (parts[3] or parts[2] or "the dungeon")
             .. "!|r Use |cff7fd6a8Teleport out|r to return to your previous location.")

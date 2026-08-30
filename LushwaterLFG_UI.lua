@@ -303,7 +303,65 @@ function UI.build()
     UI.buildReadyStatus()
     UI.buildMinimapButton()
     UI.buildCompleteFrame()
+    UI.buildUpdateOverlay()
     UI.showTab(LWLFG.settings.tab or "random")
+end
+
+-- ---------------------------------------------------------------------------
+-- Update-required overlay (soft block)
+-- ---------------------------------------------------------------------------
+
+-- Covers the whole window when the server reports the addon is below the
+-- minimum version, so the player cannot use the addon until they update.
+-- Shown only when the window is opened (never mid-run), per the design.
+function UI.buildUpdateOverlay()
+    if ui.updateOverlay then return end
+    local f = ui.frame
+    if not f then return end
+
+    local o = CreateFrame("Frame", nil, f)
+    o:SetAllPoints(f)
+    o:SetFrameLevel(f:GetFrameLevel() + 10)
+    o:EnableMouse(true)
+    o:SetScript("OnMouseDown", function() end)   -- swallow clicks
+    o:SetScript("OnMouseUp", function() end)
+    o:Hide()
+
+    local bg = o:CreateTexture(nil, "BACKGROUND")
+    bg:SetAllPoints(o)
+    bg:SetTexture(0, 0, 0, 0.85)
+
+    local title = o:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+    title:SetPoint("TOP", o, "TOP", 0, -60)
+    title:SetText("|cffffd100Update Required|r")
+
+    local body = o:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    body:SetPoint("TOP", title, "BOTTOM", 0, -20)
+    body:SetWidth(300)
+    body:SetJustifyH("CENTER")
+    body:SetText("Your Lushwater LFG addon is out of date.\n\n"
+        .. "Please update to the latest version from lushwater.net\n"
+        .. "to continue using the Dungeon Finder.")
+
+    local ver = o:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    ver:SetPoint("BOTTOM", o, "BOTTOM", 0, 30)
+    ver:SetText("|cff888888Installed v" .. LWLFG.ADDON_VERSION .. "|r")
+
+    ui.updateOverlay = o
+end
+
+-- Called from LWLFG.onVersion when the server reports versions. Shows the
+-- overlay immediately if the window is already open; otherwise it appears on
+-- the next open.
+function UI.onVersion()
+    if not ui.updateOverlay then return end
+    if LWLFG.blocked then
+        if ui.frame and ui.frame:IsVisible() then
+            ui.updateOverlay:Show()
+        end
+    else
+        ui.updateOverlay:Hide()
+    end
 end
 
 function UI.showTab(which)
@@ -1479,6 +1537,11 @@ function UI.toggle()
         rotateRewardsBg()
         UI.refresh()
         ui.frame:Show()
+        -- soft block: cover the window on open when the addon is below the
+        -- server's minimum version
+        if ui.updateOverlay then
+            if LWLFG.blocked then ui.updateOverlay:Show() else ui.updateOverlay:Hide() end
+        end
     end
 end
 

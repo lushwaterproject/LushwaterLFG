@@ -9,7 +9,7 @@
 
 LWLFG = LWLFG or {}   -- global namespace shared by all addon files
 
-LWLFG.ADDON_VERSION = "1.2"
+LWLFG.ADDON_VERSION = "1.3"
 LWLFG.CHANNEL_NAME  = "LushLFG"
 LWLFG.BOT_NAME      = "LushLFG"   -- server whisper/channel bot identity
 LWLFG.MSG_PREFIX    = "LW"          -- every protocol message starts with "LW:"
@@ -136,6 +136,48 @@ function LWLFG.joinKeys(keys, sep)
     end
     return out
 end
+
+-- ---------------------------------------------------------------------------
+-- Addon version check (server-driven)
+-- ---------------------------------------------------------------------------
+
+-- Parse a dotted numeric version ("1.2.3") into a comparable number. Returns
+-- nil for anything unparseable so callers can fail silent.
+function LWLFG.versionToNum(v)
+    if not v then return nil end
+    local total, mult = 0, 1
+    for _, part in ipairs(LWLFG.split(v, ".")) do
+        local n = tonumber(part)
+        if not n then return nil end
+        total = total + n * mult
+        mult = mult * 1000
+    end
+    return total
+end
+
+-- Called when the server bot reports the latest/minimum addon versions
+-- (VER:<latest>:<min>). Stores the state, prints a one-time chat notice per
+-- session, and flags the UI to cover the window on next open when the local
+-- version is below the minimum.
+function LWLFG.onVersion(latest, min)
+    local mine = LWLFG.versionToNum(LWLFG.ADDON_VERSION)
+    local latestN = LWLFG.versionToNum(latest)
+    local minN = LWLFG.versionToNum(min)
+    if not mine or not latestN then return end
+
+    LWLFG.serverLatest = latest
+    LWLFG.serverMin = min
+    LWLFG.outdated = latestN > mine
+    LWLFG.blocked = minN and minN > mine
+
+    if LWLFG.outdated and not LWLFG.versionNotified then
+        LWLFG.versionNotified = true
+        LWLFG.print("|cffffd100A newer version (v" .. latest
+            .. ") is available — update from lushwater.net|r")
+    end
+    if LWLFG.UI and LWLFG.UI.onVersion then LWLFG.UI.onVersion() end
+end
+
 
 function LWLFG.myClassToken()
     local _, c = UnitClass("player")   -- english token, e.g. "WARRIOR"
