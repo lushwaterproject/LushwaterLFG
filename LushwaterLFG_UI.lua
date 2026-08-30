@@ -320,7 +320,16 @@ function UI.buildUpdateOverlay()
     if not f then return end
 
     local o = CreateFrame("Frame", nil, f)
-    o:SetAllPoints(f)
+    -- With the LFT skin the 384x512 canvas is mostly chrome; the visible
+    -- window occupies x 10..350, y -8..-435. Cover only that region so the
+    -- overlay matches the window instead of spilling over the frame.
+    if ui.skin then
+        o:SetPoint("TOPLEFT", f, "TOPLEFT", 10, -8)
+        o:SetWidth(340)
+        o:SetHeight(427)
+    else
+        o:SetAllPoints(f)
+    end
     o:SetFrameLevel(f:GetFrameLevel() + 10)
     o:EnableMouse(true)
     o:SetScript("OnMouseDown", function() end)   -- swallow clicks
