@@ -224,7 +224,7 @@ local function issueProposal()
     -- subvert a per-proposal `math.random` to always force the least-wanted
     -- dungeon; the rotation is fixed per minute, and every member still
     -- validates the chosen dungeon before accepting (see the PROP handler).
-    local pick = (math.floor(GetTime() / 60) % table.getn(dungeonList)) + 1
+    local pick = (math.mod(math.floor(GetTime() / 60), table.getn(dungeonList))) + 1
     local dungeon = dungeonList[pick]
 
     local id = LWLFG.me .. "-" .. time()
